@@ -9,7 +9,7 @@ public class Client {
 
 	public void initiate(String host, int port, String localAddr, int localPort) {
 		try (Socket client = new Socket(host, port, InetAddress.getByName(localAddr), localPort)) {
-			System.out.println("Cliente conectou no servidor! Porta: " + client.getLocalPort());
+			System.out.println("Cliente " + client.getLocalPort() + " conectou no servidor!");
 			performTask(client);
 		} catch (UnknownHostException e) {
 			System.err.println(e);
@@ -26,9 +26,7 @@ public class Client {
 			
 		} catch (Exception e) {
 			System.err.println(e);
-		} finally {
-			System.out.println("Cliente desconectado! Porta: " + client.getLocalPort());
-		}
+		} 
 	}
 
 }

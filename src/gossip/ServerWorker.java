@@ -1,46 +1,31 @@
 package gossip;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class ServerWorker implements Runnable {
-	
 	private Socket client;
-	
-	public ServerWorker(Socket client) {
+	private String message;
+	private BufferedWriter wr;
+
+	public ServerWorker(Socket client, String message) {
 		this.client = client;
+		this.message = message;
 	}
-	
+
 	@Override
 	public void run() {
 		try {
-			sendMessage();
-			Thread.sleep(50000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+			wr = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+			wr.write(message);
+			wr.flush();
+			wr.close();
 
-	private void sendMessage() throws IOException {
-		try(Scanner t = new Scanner(System.in)){
-			while(t.hasNextLine()) {
-				PrintStream write = new PrintStream(client.getOutputStream());
-				String message = t.nextLine();
-				if(disconnect(message))
-					break;
-				write.println(message);
-			}
 		} catch (IOException e) {
-			System.err.println(e);
+			e.printStackTrace();
 		}
-	}
-	
-	private boolean disconnect(String message) {
-		return message.equals("");
 	}
 
 }
