@@ -1,59 +1,42 @@
 package gossip;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
-	private int localPort;
-	private String host = "127.0.0.1";
-	private ObjectOutputStream output;
-	private ServerSocket server = null;
+	private static ExecutorService configuraThreads;
 
-	public Server(int localPort) {
-		this.localPort = localPort;
-	}
+	public static void main(String[] args) {
+		int port = 2801;
 
-	public void startServer() throws InterruptedException {
 		try {
-			server = new ServerSocket(localPort);
-			
-			//while(true) {
-			System.out.println("Servidor está ouvindo na porta " + localPort);
+			System.out.println("======= Servidor rodando na porta " + port + " =======");
+			ServerSocket server = new ServerSocket(port);
+			configuraThreads = Executors.newWorkStealingPool();
 
-			int port = server.getLocalPort();
+			while (true) {
+				waiting(server);
+			}
 
-			Socket client = new Socket(host, server.getLocalPort(), InetAddress.getLocalHost(), (port + 1));
-
-			new Thread(new ServerWorker(server, client)).start();
-
-			
-			sendMessage("Mensagem", client);
-
-
-			//}
-
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			System.err.println(e);
 		}
 	}
 
-	public void sendMessage(String message, Socket client) {
-
+	public static void waiting(ServerSocket server) {
+		Socket client = null;
+		
 		try {
-			output = new ObjectOutputStream(client.getOutputStream());
-
-			output.writeUTF(message);
-			output.flush();
-			output.close();
-
+			client = server.accept();
+			System.out.println("Novo cliente conectado no servidor! Porta: " + client.getPort());
+			ServerWorker worker = new ServerWorker(client);
+			configuraThreads.execute(worker);
+			
 		} catch (IOException e) {
-			System.out.println("Server está desconectado.");
-			e.printStackTrace();
-		} 
+			System.err.println(e);
+		}
 	}
-
 }
