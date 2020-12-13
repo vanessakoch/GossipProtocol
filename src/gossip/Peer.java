@@ -30,5 +30,5 @@ public class Peer {
 	public String toString() {
 		return "Ip: " + ip + ", porta: " + port;
 	}
-	
+
 }

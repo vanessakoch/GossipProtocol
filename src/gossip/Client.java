@@ -1,32 +1,37 @@
 package gossip;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
-public class Client {
+public class Client extends Thread {
+	private String localAddr;
+	private int port;
+	private String msg;
+	private BufferedWriter wr;
 
-	public void initiate(String host, int port, String localAddr, int localPort) {
-		try (Socket client = new Socket(host, port, InetAddress.getByName(localAddr), localPort)) {
-			System.out.println("Cliente " + client.getLocalPort() + " conectou no servidor!");
-			performTask(client);
-		} catch (UnknownHostException e) {
-			System.err.println(e);
-		} catch (IOException e) {
-			System.err.println(e);
-		}
+	public Client(String localAddr, int port, String msg) {
+		this.localAddr = localAddr;
+		this.port = port;
+		this.msg = msg;
 	}
 
-	private void performTask(Socket client) {
+	@Override
+	public void run() {
+		Socket client;
+		
 		try {
-			Thread worker = new Thread(new ClientWorker(client));
-			worker.start();
-			worker.join();
+			client = new Socket(localAddr, port);
+			wr = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+			wr.write(msg);
+			wr.flush();
+			wr.close();
 			
-		} catch (Exception e) {
-			System.err.println(e);
-		} 
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 }
