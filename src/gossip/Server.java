@@ -13,17 +13,13 @@ public class Server extends Thread {
 	private ServerSocket server;
 	private Socket client;
 	private BufferedReader reader;
-
-	private int countMyRequest = 0;
-	private boolean isIt = false;
-	private String lastRequest[];
-	
-	private List<String> sendMsgs = new ArrayList<String>();
+	private List<String> messageList;
 
 	public Server(int port, List<Peer> peersList) {
 		super();
 		this.port = port;
 		this.peersList = peersList;
+		this.messageList = new ArrayList<String>();
 	}
 
 	@Override
@@ -34,44 +30,36 @@ public class Server extends Thread {
 
 			while (true) {
 				client = server.accept();
-				
+
 				reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
 				String msg = reader.readLine();
 				System.out.println(msg);
 				reader.close();
 
 				String[] copyReceive = msg.split(" ");
-			
+
 				String sendMsg = port + " enviou fofoca: " + copyReceive[3];
-				
-//				System.out.println("countMyReq: " + countMyRequest);
-//				System.out.println("main i: " + Main.i);
-				
-				if (!isSent(sendMsg)) {
+
+				if (!isAlreadySent(sendMsg)) {
 					for (Peer peer : peersList) {
-						System.out.println(countMyRequest);
 						new Thread(new Client(peer.getIp(), peer.getPort(), sendMsg)).run();
 					}
-				} 
-				 
+				}
 			}
-			
-			
+
 		} catch (Exception e) {
 			System.err.println(e);
 		}
 	}
 
-	private boolean isSent(String msg) {
-		for(String s : sendMsgs) {
-			if(s.equals(msg)) {
-				countMyRequest++;
+	private boolean isAlreadySent(String msg) {
+		for (String s : messageList) {
+			if (s.equals(msg)) {
 				return true;
 			}
 		}
-		sendMsgs.add(msg);
+		messageList.add(msg);
 		return false;
 	}
-
 
 }

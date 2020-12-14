@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-	static int firstClient = 0;
 	static int i = 0;
-
+	static Scanner t = new Scanner(System.in);;
+	
 	public static void main(String[] args) throws IOException {
-		Scanner t = new Scanner(System.in);
 
 		List<Peer> peersList = new ArrayList<Peer>();
 		String host = "127.0.0.1";
